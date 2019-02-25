@@ -1,0 +1,24 @@
+version: '3'
+services:
+  flask-app:
+    build: my_app
+    image: my-flask-api
+    container_name: flask-api
+    ports:
+      - 5000:5000
+    environment:
+      DB_USER: root
+      DB_PASSWORD: 1234
+      FLASK_ENV: ${FLASK_ENV}
+  db-dev:
+    image: mysql:5.7
+    container_name: db-dev-mysql
+    environment:
+      MYSQL_DATABASE: flask-db
+      MYSQL_ROOT_PASSWORD: 1234
+  db-test:
+    image: mysql:5.7
+    container_name: db-dev-test
+    environment:
+      MYSQL_DATABASE: flask-db
+      MYSQL_ROOT_PASSWORD: 1234
