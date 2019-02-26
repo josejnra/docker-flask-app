@@ -1,5 +1,4 @@
 import datetime
-import importlib
 import json
 import re
 from abc import ABC, abstractmethod
@@ -7,7 +6,7 @@ from abc import ABC, abstractmethod
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.inspection import inspect
 
-from my_app.app import db
+from my_app.models import db
 
 
 class AbstractRepository(ABC):
@@ -17,31 +16,11 @@ class AbstractRepository(ABC):
 
     @property
     @abstractmethod
-    def model_module(self):
-        """
-            String for the model's module path.
-        """
-        raise NotImplementedError
-
-    @property
-    @abstractmethod
     def model_class(self):
         """
             String for the model's class name.
         """
         raise NotImplementedError
-
-    def _get_model(self):
-        """
-            Method to return an instance of the repository's model.
-
-            Returns
-            ----------
-            Object
-                An instance of the model specified in the attribute 'model_classs'.
-        """
-        model_class = getattr(importlib.import_module(self.model_module), self.model_class)
-        return model_class()
 
     def get_model_columns(self):
         """
@@ -52,8 +31,7 @@ class AbstractRepository(ABC):
             list
                 String list with the repository's model columns.
         """
-        model_class = getattr(importlib.import_module(self.model_module), self.model_class)
-        return [m.key for m in model_class().__table__.columns]
+        return [m.key for m in self.model_class.__table__.columns]
 
     def commit(self):
         return db.session.commit()
@@ -80,8 +58,8 @@ class AbstractRepository(ABC):
             EntityNotFound
                 If cannot be find an entity with the informed id.
         """
-        primary_key = inspect(self._get_model().__class__).primary_key[0]
-        entity = self._get_model().query.filter(primary_key == id_).first()
+        primary_key = inspect(self.model_class.__class__).primary_key[0]
+        entity = self.model_class.query.filter(primary_key == id_).first()
 
         if not entity:
             raise Exception('Entity not found!')
@@ -97,7 +75,7 @@ class AbstractRepository(ABC):
             Object
                 First entity of the repository's model found with the id.
         """
-        array = [entry.to_json() for entry in self._get_model().query.all()]
+        array = [entry.to_json() for entry in self.model_class.query.all()]
         return array
 
     def create(self, args, commit_at_the_end=True):
@@ -120,7 +98,7 @@ class AbstractRepository(ABC):
             EntityAlreadyExists
                 If an integrity error is identified during the create process.
         """
-        new_model = self._get_model()
+        new_model = self.model_class
         for key, value in args.items():
             pattern = '\.'+key+'$'
             for attribute in new_model.__table__.columns:
@@ -168,8 +146,8 @@ class AbstractRepository(ABC):
             EntityAlreadyExists
                 If an integrity error is identified during the update process.
         """
-        primary_key = inspect(self._get_model().__class__).primary_key[0]
-        model = self._get_model().query.filter(primary_key == id_).first()
+        primary_key = inspect(self.model_class.__class__).primary_key[0]
+        model = self.model_class.query.filter(primary_key == id_).first()
         if not model:
             raise Exception('Cannot find entity')
         for key, value in args.items():
@@ -210,8 +188,8 @@ class AbstractRepository(ABC):
            EntityNotFound
                If cannot be find an entity with the informed id.
        """
-        primary_key = inspect(self._get_model().__class__).primary_key[0]
-        model = self._get_model().query.filter(primary_key == id_).first()
+        primary_key = inspect(self.model_class.__class__).primary_key[0]
+        model = self.model_class.query.filter(primary_key == id_).first()
         if not model:
             raise Exception('Cannot find entity')
         db.session.delete(model)
@@ -220,10 +198,14 @@ class AbstractRepository(ABC):
 
 
 class TeamsRepository(AbstractRepository):
-    model_module = 'my_app.models'
-    model_class = 'TeamsModel'
+
+    from my_app.models import TeamsModel
+
+    model_class = TeamsModel()
 
 
 class PlayersRepository(AbstractRepository):
-    model_module = 'my_app.models'
-    model_class = 'PlayersModel'
+
+    from my_app.models import PlayersModel
+
+    model_class = PlayersModel()

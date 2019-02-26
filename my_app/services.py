@@ -1,4 +1,3 @@
-import importlib
 from abc import ABC, abstractmethod
 
 from flask_restful import reqparse
@@ -9,14 +8,6 @@ class AbstractService(ABC):
     """
         Abstract class to create services.
     """
-
-    @property
-    @abstractmethod
-    def repository_module(self):
-        """
-            String for the repository's module path.
-        """
-        raise NotImplementedError
 
     @property
     @abstractmethod
@@ -72,19 +63,7 @@ class AbstractService(ABC):
         """
         return ['id', 'slug', 'created_at', 'updated_at']
 
-    def _get_repository(self):
-        """
-            Method to return an instance of the repository's model.
-
-            Returns
-            ----------
-            Object
-                An instance of the repository specified in the attribute 'repository_class'.
-        """
-        service_class = getattr(importlib.import_module(self.repository_module), self.repository_class)
-        return service_class()
-
-    def _validate_by_parse(self, required_list, ignore_list={}):
+    def _validate_by_parse(self, required_list, ignore_list=[]):
         """
            Method to validate the request payload.
 
@@ -105,7 +84,7 @@ class AbstractService(ABC):
            CannotBeBlank
                If a required column is informed in the payload but its value is blank.
        """
-        columns = self._get_repository().get_model_columns()
+        columns = self.repository_class.get_model_columns()
 
         parser = reqparse.RequestParser()
         for column in columns:
@@ -135,7 +114,7 @@ class AbstractService(ABC):
                 New entity created by the repository's model.
         """
         args = self._validate_by_parse(self.required_on_create, self.ignore_on_create)
-        return self._get_repository().create(args)
+        return self.repository_class.create(args)
 
     def retrieve(self, id_):
         """
@@ -153,9 +132,9 @@ class AbstractService(ABC):
         """
         self._validate_by_parse(self.required_on_retrieve)
         if id_ is None:
-            return self._get_repository().all()
+            return self.repository_class.all()
         else:
-            return self._get_repository().find(id_)
+            return self.repository_class.find(id_)
 
     def update(self, id_):
         """
@@ -172,7 +151,7 @@ class AbstractService(ABC):
                 The updated entity selected using the identifier by the repository's model.
         """
         args = self._validate_by_parse(self.required_on_update, self.ignore_on_update)
-        return self._get_repository().update(id_, args)
+        return self.repository_class.update(id_, args)
 
     def delete(self, id_):
         """
@@ -189,16 +168,28 @@ class AbstractService(ABC):
                 A message confirming the deletion by repository's model.
         """
         self._validate_by_parse(self.required_on_delete)
-        return self._get_repository().delete(id_)
+        return self.repository_class.delete(id_)
 
 
 class TeamsService(AbstractService):
 
-    repository_module = 'my_app.repositories'
-    repository_class = 'TeamsRepository'
+    from my_app.repositories import TeamsRepository
+
+    repository_class = TeamsRepository()
+
+    required_on_create = []
+    required_on_retrieve = []
+    required_on_update = []
+    required_on_delete = []
 
 
 class PlayersService(AbstractService):
 
-    repository_module = 'my_app.repositories'
-    repository_class = 'PlayersRepository'
+    from my_app.repositories import PlayersRepository
+
+    repository_class = PlayersRepository()
+
+    required_on_create = []
+    required_on_retrieve = []
+    required_on_update = []
+    required_on_delete = []

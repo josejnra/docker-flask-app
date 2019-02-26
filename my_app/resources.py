@@ -1,6 +1,5 @@
-import importlib
+from abc import abstractmethod
 
-from flask import request
 from flask_restful import Resource
 
 
@@ -16,23 +15,12 @@ class AbstractResource(Resource):
         raise NotImplementedError
 
     @property
+    @abstractmethod
     def service_class(self):
         """
             String for the service's class name.
         """
         raise NotImplementedError
-
-    def _get_service(self):
-        """
-            Method to return an instance of the service's model.
-
-            Returns
-            ----------
-            Object
-                An instance of the service specified in the attribute 'service_class'.
-        """
-        service_class = getattr(importlib.import_module(self.service_module), self.service_class)
-        return service_class()
 
     def get(self, id_=None):
         """
@@ -48,7 +36,7 @@ class AbstractResource(Resource):
             Object
                 First entity found by the service.
         """
-        return self._get_service().retrieve(id_)
+        return self.service_class.retrieve(id_)
 
     def post(self):
         """
@@ -59,7 +47,7 @@ class AbstractResource(Resource):
             Object
                 Entity created by the service.
         """
-        return self._get_service().create()
+        return self.service_class.create()
 
     def put(self, id_=None):
         """
@@ -83,7 +71,7 @@ class AbstractResource(Resource):
         if id_ is None:
             raise Exception('Cannot find entity without an identifier.')
         else:
-            return self._get_service().update(id_)
+            return self.service_class.update(id_)
 
     def delete(self, id_=None):
         """
@@ -107,24 +95,22 @@ class AbstractResource(Resource):
         if id_ is None:
             raise Exception('Cannot find entity without an identifier.')
         else:
-            return self._get_service().delete(id_)
-
-    def _get_headers_request(self):
-        """
-            Returns
-            ----------
-            dict
-               Request header as a dict.
-
-       """
-        return request.headers
+            return self.service_class.delete(id_)
 
 
 class TeamsResource(AbstractResource):
-    service_module = 'my_app.services'
-    service_class = 'TeamsService'
+
+    from my_app.services import TeamsService
+
+    service_class = TeamsService()
+
+    #def get(self, id_=None):
+    #    print("CHAMOU AQUI")
+    #    return {'resposta': 'NADA'}
 
 
 class PlayersResource(AbstractResource):
-    service_module = 'my_app.services'
-    service_class = 'PlayersService'
+
+    from my_app.services import PlayersService
+
+    service_class = PlayersService()

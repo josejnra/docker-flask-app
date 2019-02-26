@@ -3,14 +3,6 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_restful import Api
 
 from my_app.config import get_config
-from my_app.resources import TeamsResource, PlayersResource
-
-app = Flask(__name__)
-
-
-@app.route('/')
-def hello_world():
-    return 'Hello World!'
 
 
 application = Flask(__name__)
@@ -22,11 +14,12 @@ db.init_app(application)
 api_bp = Blueprint('api', __name__)
 api = Api(api_bp)
 
-app.register_blueprint(api_bp, url_prefix='/api')
+application.register_blueprint(api_bp, url_prefix='/api')
 
-# Resources
-api.add_resource(TeamsResource, '/teams', '/teams/<int:id_>', strict_slashes=False)
-api.add_resource(PlayersResource, '/players', '/teams/<int:id_>', strict_slashes=False)
+
+@application.route('/')
+def hello_world():
+    return 'Hello World!'
 
 
 @application.after_request
@@ -50,5 +43,11 @@ def handle_exception(error):
 
 
 application.register_error_handler(Exception, handle_exception)
+
+from my_app.resources import TeamsResource, PlayersResource
+
+# Resources
+api.add_resource(TeamsResource, '/teams', '/teams/<int:id_>', strict_slashes=False)
+api.add_resource(PlayersResource, '/players', '/teams/<int:id_>', strict_slashes=False)
 
 from my_app.models import TeamsModel, PlayersModel
