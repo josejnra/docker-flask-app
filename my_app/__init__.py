@@ -1,4 +1,4 @@
-from flask import Flask, Blueprint
+from flask import Flask, Blueprint, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_restful import Api
 
@@ -30,6 +30,7 @@ def after_request(response):
     return response
 
 
+@application.errorhandler(Exception)
 def handle_exception(error):
     """
         Function to handle exceptions when it is raised in the app.
@@ -39,7 +40,7 @@ def handle_exception(error):
         error: AbstractException
             Exception to be handle.
     """
-    return {'exception': error}
+    return jsonify({'exception': str(error)})
 
 
 application.register_error_handler(Exception, handle_exception)

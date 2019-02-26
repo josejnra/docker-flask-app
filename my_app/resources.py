@@ -9,12 +9,6 @@ class AbstractResource(Resource):
     """
         Abstract class to create resources.
     """
-    @property
-    def service_module(self):
-        """
-            String for the service's module path.
-        """
-        raise NotImplementedError
 
     @property
     @abstractmethod
