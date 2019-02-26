@@ -2,8 +2,8 @@ from datetime import datetime
 
 from sqlalchemy.orm.state import InstanceState
 
-from my_app.app import db
-from serializer import Serializer
+from my_app import db
+from my_app.serializer import Serializer
 
 
 class AbstractModel:

@@ -23,6 +23,7 @@ class TestConfig(BaseConfig):
 class DevelopmentConfig(BaseConfig):
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = 'mysql://' + USER + ':' + PASSWORD + '@db-dev/flask-db'
+    SQLALCHEMY_DATABASE_URI = 'mysql://' + USER + ':' + PASSWORD + '@127.0.0.1:3307/flask-db'
 
 
 def get_config():
