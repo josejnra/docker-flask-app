@@ -7,6 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.inspection import inspect
 
 from my_app.models import db
+from my_app.models import TeamsModel, PlayersModel
 
 
 class AbstractRepository(ABC):
@@ -199,13 +200,9 @@ class AbstractRepository(ABC):
 
 class TeamsRepository(AbstractRepository):
 
-    from my_app.models import TeamsModel
-
     model_class = TeamsModel()
 
 
 class PlayersRepository(AbstractRepository):
-
-    from my_app.models import PlayersModel
 
     model_class = PlayersModel()

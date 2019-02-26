@@ -3,6 +3,8 @@ from abc import ABC, abstractmethod
 from flask_restful import reqparse
 from werkzeug.exceptions import BadRequest
 
+from my_app.repositories import TeamsRepository, PlayersRepository
+
 
 class AbstractService(ABC):
     """
@@ -173,8 +175,6 @@ class AbstractService(ABC):
 
 class TeamsService(AbstractService):
 
-    from my_app.repositories import TeamsRepository
-
     repository_class = TeamsRepository()
 
     required_on_create = []
@@ -184,8 +184,6 @@ class TeamsService(AbstractService):
 
 
 class PlayersService(AbstractService):
-
-    from my_app.repositories import PlayersRepository
 
     repository_class = PlayersRepository()
 

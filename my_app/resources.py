@@ -2,6 +2,8 @@ from abc import abstractmethod
 
 from flask_restful import Resource
 
+from my_app.services import TeamsService, PlayersService
+
 
 class AbstractResource(Resource):
     """
@@ -100,17 +102,9 @@ class AbstractResource(Resource):
 
 class TeamsResource(AbstractResource):
 
-    from my_app.services import TeamsService
-
     service_class = TeamsService()
-
-    #def get(self, id_=None):
-    #    print("CHAMOU AQUI")
-    #    return {'resposta': 'NADA'}
 
 
 class PlayersResource(AbstractResource):
-
-    from my_app.services import PlayersService
 
     service_class = PlayersService()
